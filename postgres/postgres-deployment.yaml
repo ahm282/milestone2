@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: postgres-deployment
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: postgres
+    template:
+        metadata:
+            labels:
+                app: postgres
+        spec:
+            containers:
+                - name: postgres-container
+                  image: postgres:latest
+                  env:
+                      - name: POSTGRES_USER
+                        value: kube
+                      - name: POSTGRES_PASSWORD
+                        value: kube
+                      - name: POSTGRES_DB
+                        value: milestone
+                  ports:
+                      - containerPort: 5432
+                  volumeMounts:
+                      - name: psql-data
+                        mountPath: /var/lib/postgresql/data
+                      - name: init-scripts
+                        mountPath: /docker-entrypoint-initdb.d
+            volumes:
+                - name: psql-data
+                  emptyDir: {}
+                - name: init-scripts
+                  hostPath:
+                      path: /vagrant/deployments/postgres/init-scripts
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: postgres-service
+spec:
+    selector:
+        app: postgres
+    ports:
+        - protocol: TCP
+          port: 5432
+          targetPort: 5432

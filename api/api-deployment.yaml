@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: api-deployment
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: api
+    template:
+        metadata:
+            labels:
+                app: api
+        spec:
+            containers:
+                - name: api-container
+                  image: ahm282/milestone2:fastapi
+                  imagePullPolicy: Always
+                  ports:
+                      - containerPort: 8000
+                  volumeMounts:
+                      - name: main-script
+                        mountPath: /code
+            volumes:
+                - name: main-script
+                  hostPath:
+                      path: /vagrant/deployments/api/app
+                      type: Directory
